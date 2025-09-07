@@ -2,10 +2,12 @@
 import React, { Suspense } from "react"
 import Navbar from "./components/Navbar"
 import dynamic from "next/dynamic"
+import Templates from "./components/home/Templates"
 
 const Hero = dynamic(() => import("./components/home/Hero"), { ssr: false })
 const Features = dynamic(() => import("./components/home/Features"), { ssr: false })
 const FrameWorks = dynamic(() => import("./components/home/FrameWorks"), { ssr: false })
+
 
 const Page = () => {
   return (
@@ -15,6 +17,7 @@ const Page = () => {
         <Hero />
         <Features />
         <FrameWorks />
+        <Templates />
       </Suspense>
     </div>
   )
