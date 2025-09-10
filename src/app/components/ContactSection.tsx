@@ -17,31 +17,28 @@ type FormState = {
 type Status = { type: "success" | "error"; message: string } | null;
 
 export default function ContactSection() {
-  const containerRef = useRef<null | HTMLDivElement>(null);
-  const successRef = useRef<null | HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const successRef = useRef<HTMLDivElement | null>(null);
 
   const [form, setForm] = useState<FormState>({ name: "", email: "", company: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<Status>(null);
 
-  // Load user from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("user");
       if (raw) {
-        const u = JSON.parse(raw);
+        const u = JSON.parse(raw) as { name?: string; email?: string };
         setForm((s) => ({ ...s, name: u.name || s.name, email: u.email || s.email }));
       }
     } catch {}
   }, []);
 
-  // Input change
   function onChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
     setForm((s) => ({ ...s, [name]: value }));
   }
 
-  // Form validation
   function validate() {
     if (!form.name.trim()) return "Please enter your name.";
     if (!form.email.trim()) return "Please enter your email.";
@@ -50,7 +47,6 @@ export default function ContactSection() {
     return null;
   }
 
-  // Submit handler
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus(null);
@@ -70,8 +66,9 @@ export default function ContactSection() {
       setStatus({ type: "success", message: "We got your message! Expect a reply in 24h 🚀" });
       setForm((s) => ({ ...s, company: "", message: "" }));
       setTimeout(() => successRef.current?.focus?.(), 50);
-    } catch (err: any) {
-      setStatus({ type: "error", message: err.message || "Something went wrong." });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong.";
+      setStatus({ type: "error", message });
     } finally {
       setLoading(false);
     }
@@ -209,13 +206,27 @@ export default function ContactSection() {
   );
 }
 
-function ContactMethod({ icon: Icon, title, subtitle, desc, small }: { icon: any; title: string; subtitle: string; desc: string; small?: boolean }) {
+function ContactMethod({
+  icon: Icon,
+  title,
+  subtitle,
+  desc,
+  small,
+}: {
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  desc: string;
+  small?: boolean;
+}) {
   return (
     <div className="flex items-start gap-3">
-      <div className={cn(
-        "w-10 h-10 rounded-lg flex items-center justify-center shadow-sm",
-        small ? "bg-gray-100 text-indigo-500" : "bg-gray-100 text-indigo-600"
-      )}>
+      <div
+        className={cn(
+          "w-10 h-10 rounded-lg flex items-center justify-center shadow-sm",
+          small ? "bg-gray-100 text-indigo-500" : "bg-gray-100 text-indigo-600"
+        )}
+      >
         <Icon className={small ? "w-4 h-4" : "w-6 h-6"} />
       </div>
       <div>
@@ -225,4 +236,4 @@ function ContactMethod({ icon: Icon, title, subtitle, desc, small }: { icon: any
       </div>
     </div>
   );
-}  
+}
