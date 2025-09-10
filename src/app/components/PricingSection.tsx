@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -34,8 +34,8 @@ const plans = [
   },
   {
     name: "Enterprise",
-    monthly: "Custom",
-    yearly: "Custom",
+    monthly: null,
+    yearly: null,
     features: [
       "Unlimited projects",
       "Dedicated account manager",
@@ -54,10 +54,6 @@ export default function PricingSection() {
 
   return (
     <section className="relative bg-gray-50 py-24 px-6 overflow-hidden">
-      {/* Background shapes */}
-      <div className="absolute -top-24 -left-32 w-72 h-72 bg-gradient-to-tr from-indigo-300 to-purple-400 opacity-20 rounded-full blur-3xl animate-slow-spin"></div>
-      <div className="absolute -bottom-32 -right-24 w-96 h-96 bg-gradient-to-tr from-pink-300 to-yellow-300 opacity-20 rounded-full blur-3xl animate-slow-spin-slow"></div>
-
       {/* Section Header */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -69,7 +65,6 @@ export default function PricingSection() {
         <p className="mt-2 text-sm md:text-base text-gray-500">
           Choose a plan to launch and scale your website effortlessly. Start free, upgrade anytime.
         </p>
-
         {/* Billing toggle */}
         <div className="mt-6 inline-flex border rounded-full bg-white shadow-sm">
           <button
@@ -103,7 +98,6 @@ export default function PricingSection() {
               plan.popular ? "border-indigo-600 bg-indigo-50" : "border-gray-200 bg-white"
             } p-8 shadow-sm hover:shadow-lg transition`}
           >
-            {/* Popular Badge */}
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-indigo-600 text-white text-xs rounded-full font-semibold">
                 Most Popular
@@ -113,15 +107,15 @@ export default function PricingSection() {
             {/* Plan Info */}
             <div className="flex flex-col gap-4">
               <h3 className="text-lg font-medium text-gray-900">{plan.name}</h3>
-              {plan.price !== null && (
+
+              {/* Only show price if numbers exist */}
+              {typeof plan.monthly === "number" && typeof plan.yearly === "number" && (
                 <p className="text-2xl font-semibold text-gray-900">
-                  {typeof plan.monthly === "number" && typeof plan.yearly === "number" ? (
-                    `$${billing === "monthly" ? plan.monthly : plan.yearly}${billing === "monthly" ? "/mo" : "/yr"}`
-                  ) : (
-                    plan.price
-                  )}
+                  ${billing === "monthly" ? plan.monthly : plan.yearly}
+                  {billing === "monthly" ? "/mo" : "/yr"}
                 </p>
               )}
+
               <ul className="mt-2 space-y-1 text-gray-500 text-sm">
                 {plan.features.map((f) => (
                   <li key={f} className="before:content-['✓'] before:text-indigo-600 before:mr-2">
