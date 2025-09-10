@@ -1,20 +1,30 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, ChangeEvent } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Phone, Mail, MapPin, Twitter, Github, Linkedin } from "lucide-react";
 
-export default function ContactPage() {
-  const containerRef = useRef(null);
-  const successRef = useRef(null);
+type FormState = {
+  name: string;
+  email: string;
+  company: string;
+  message: string;
+};
 
-  const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
+type Status = { type: "success" | "error"; message: string } | null;
+
+export default function ContactSection() {
+  const containerRef = useRef<null | HTMLDivElement>(null);
+  const successRef = useRef<null | HTMLDivElement>(null);
+
+  const [form, setForm] = useState<FormState>({ name: "", email: "", company: "", message: "" });
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null);
+  const [status, setStatus] = useState<Status>(null);
 
+  // Load user from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("user");
@@ -25,11 +35,13 @@ export default function ContactPage() {
     } catch {}
   }, []);
 
-  function onChange(e) {
+  // Input change
+  function onChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
     setForm((s) => ({ ...s, [name]: value }));
   }
 
+  // Form validation
   function validate() {
     if (!form.name.trim()) return "Please enter your name.";
     if (!form.email.trim()) return "Please enter your email.";
@@ -38,7 +50,8 @@ export default function ContactPage() {
     return null;
   }
 
-  async function onSubmit(e) {
+  // Submit handler
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus(null);
     const v = validate();
@@ -57,7 +70,7 @@ export default function ContactPage() {
       setStatus({ type: "success", message: "We got your message! Expect a reply in 24h 🚀" });
       setForm((s) => ({ ...s, company: "", message: "" }));
       setTimeout(() => successRef.current?.focus?.(), 50);
-    } catch (err) {
+    } catch (err: any) {
       setStatus({ type: "error", message: err.message || "Something went wrong." });
     } finally {
       setLoading(false);
@@ -196,7 +209,7 @@ export default function ContactPage() {
   );
 }
 
-function ContactMethod({ icon: Icon, title, subtitle, desc, small }) {
+function ContactMethod({ icon: Icon, title, subtitle, desc, small }: { icon: any; title: string; subtitle: string; desc: string; small?: boolean }) {
   return (
     <div className="flex items-start gap-3">
       <div className={cn(
@@ -212,4 +225,4 @@ function ContactMethod({ icon: Icon, title, subtitle, desc, small }) {
       </div>
     </div>
   );
-}
+}  
