@@ -10,7 +10,6 @@ import Footer from "./components/Footer"
 const Hero = dynamic(() => import("./components/home/Hero"), { ssr: false })
 const Features = dynamic(() => import("./components/home/Features"), { ssr: false })
 const FrameWorks = dynamic(() => import("./components/home/FrameWorks"), { ssr: false })
-const TemplatesPreview = dynamic(() => import("./components/home/Templates"), { ssr: false })
 
 
 const Page = () => {

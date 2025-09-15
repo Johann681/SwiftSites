@@ -5,7 +5,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-const projects = [
+// Define the Project type
+interface Project {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  coverImage: string;
+  screenshots: string[];
+  demoUrl: string;
+}
+
+const projects: Project[] = [
   {
     id: 1,
     title: "Modern Portfolio",
@@ -36,7 +47,7 @@ const projects = [
 ];
 
 export default function ProjectsSection() {
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<Project | null>(null);
   const [currentImg, setCurrentImg] = useState(0);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const lastActiveRef = useRef<HTMLElement | null>(null);
@@ -175,6 +186,7 @@ export default function ProjectsSection() {
                   {/* Controls */}
                   <div className="mt-6 flex items-center justify-center gap-4">
                     <button
+                      type="button"
                       className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-50 shadow-sm transition"
                       onClick={() =>
                         setCurrentImg(
@@ -188,6 +200,7 @@ export default function ProjectsSection() {
                     <div className="flex gap-2">
                       {selected.screenshots.map((_, i) => (
                         <button
+                          type="button"
                           key={i}
                           onClick={() => setCurrentImg(i)}
                           className={`w-3 h-3 rounded-full transition ${
@@ -197,9 +210,12 @@ export default function ProjectsSection() {
                       ))}
                     </div>
                     <button
+                      type="button"
                       className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-50 shadow-sm transition"
                       onClick={() =>
-                        setCurrentImg((currentImg + 1) % selected.screenshots.length)
+                        setCurrentImg(
+                          (currentImg + 1) % selected.screenshots.length
+                        )
                       }
                     >
                       Next
@@ -215,8 +231,8 @@ export default function ProjectsSection() {
                     </h3>
                     <p className="text-base text-gray-600 mt-3 leading-relaxed">
                       {selected.description} Built for{" "}
-                      <strong>{selected.category}</strong> with a focus on modern
-                      design and responsiveness.
+                      <strong>{selected.category}</strong> with a focus on
+                      modern design and responsiveness.
                     </p>
                   </div>
 
@@ -234,6 +250,7 @@ export default function ProjectsSection() {
 
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setSelected(null)}
                 className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow"
               >
