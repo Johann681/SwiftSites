@@ -72,3 +72,51 @@ export const templates = [
     image: "/screenshot3.png",
   },
 ]
+
+export const plans = [
+  {
+    name: "Starter Site",
+    monthly: 49,
+    yearly: 390,
+    features: [
+      "1 fully designed website",
+      "Responsive & mobile-ready",
+      "Basic SEO setup",
+      "1 round of revisions",
+      "Email support",
+    ],
+    action: "Get Started",
+    popular: false,
+  },
+  {
+    name: "Business Pro",
+    monthly: 99,
+    yearly: 890,
+    features: [
+      "Up to 5 custom websites/pages",
+      "Advanced SEO optimization",
+      "Custom branding & design",
+      "Ongoing updates & revisions",
+      "Priority chat + email support",
+      "Blog setup & CMS integration",
+    ],
+    action: "Upgrade to Pro",
+    popular: true,
+  },
+  {
+    name: "Enterprise Growth",
+    monthly: null,
+    yearly: null,
+    features: [
+      "Unlimited websites & pages",
+      "Dedicated design team",
+      "E-commerce functionality",
+      "Custom integrations (CRM, APIs, etc.)",
+      "Performance monitoring & reporting",
+      "24/7 priority support",
+      "Strategy consulting",
+    ],
+    action: "Contact Sales",
+    popular: false,
+  },
+];
