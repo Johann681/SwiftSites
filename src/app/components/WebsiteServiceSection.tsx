@@ -1,9 +1,9 @@
 "use client";
-import { motion, Variant } from "framer-motion";
+
 
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variant } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { services as ALL_SERVICES, Service } from "@/lib/constants";
