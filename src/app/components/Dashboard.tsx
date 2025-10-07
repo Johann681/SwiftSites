@@ -2,7 +2,8 @@
 
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";import { QUICK_SUGGESTIONS } from "@/lib/constants";
+
 
 type Brief = {
   companyName: string;

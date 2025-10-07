@@ -256,7 +256,7 @@ export const services: Service[] = [
     order: 50,
   },
 ];
-const QUICK_SUGGESTIONS = [
+export const QUICK_SUGGESTIONS = [
   {
     title: "Portfolio Site",
     short: "Showcase your work & attract clients.",
