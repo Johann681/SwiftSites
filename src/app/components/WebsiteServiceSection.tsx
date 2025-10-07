@@ -3,7 +3,7 @@
 
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
-import { motion, AnimatePresence, Variant } from "framer-motion";
+import { motion, AnimatePresence, Variant, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { services as ALL_SERVICES, Service } from "@/lib/constants";
@@ -77,7 +77,7 @@ export default function WebsiteServicesBento() {
     show: { transition: { staggerChildren: 0.06 } },
   };
 
-  const item: Variant = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 18, rotate: -0.5 },
     show: {
       opacity: 1,
