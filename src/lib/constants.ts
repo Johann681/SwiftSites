@@ -139,7 +139,8 @@ export type Service = {
   actionHref?: string;
   iconName?: string;
   order?: number;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
+
 };
 
 export const services: Service[] = [
@@ -253,5 +254,31 @@ export const services: Service[] = [
     action: "Get Protected",
     actionHref: "/contact?service=migration-speed-security",
     order: 50,
+  },
+];
+const QUICK_SUGGESTIONS = [
+  {
+    title: "Portfolio Site",
+    short: "Showcase your work & attract clients.",
+    estimated: "₦40k–₦100k",
+    tags: ["Gallery", "Contact", "SEO"],
+  },
+  {
+    title: "E-Commerce",
+    short: "Sell online with payments and checkout.",
+    estimated: "₦120k–₦400k",
+    tags: ["Shop", "Cart", "Payments"],
+  },
+  {
+    title: "Restaurant / Food",
+    short: "Menu, ordering, and reservations.",
+    estimated: "₦60k–₦150k",
+    tags: ["Menu", "Gallery", "Order"],
+  },
+  {
+    title: "Business Website",
+    short: "Corporate branding & contact forms.",
+    estimated: "₦50k–₦200k",
+    tags: ["Services", "Lead Gen", "CTA"],
   },
 ];

@@ -12,32 +12,6 @@ type Brief = {
   description: string;
 };
 
-const QUICK_SUGGESTIONS = [
-  {
-    title: "Portfolio Site",
-    short: "Showcase your work & attract clients.",
-    estimated: "₦40k–₦100k",
-    tags: ["Gallery", "Contact", "SEO"],
-  },
-  {
-    title: "E-Commerce",
-    short: "Sell online with payments and checkout.",
-    estimated: "₦120k–₦400k",
-    tags: ["Shop", "Cart", "Payments"],
-  },
-  {
-    title: "Restaurant / Food",
-    short: "Menu, ordering, and reservations.",
-    estimated: "₦60k–₦150k",
-    tags: ["Menu", "Gallery", "Order"],
-  },
-  {
-    title: "Business Website",
-    short: "Corporate branding & contact forms.",
-    estimated: "₦50k–₦200k",
-    tags: ["Services", "Lead Gen", "CTA"],
-  },
-];
 
 export default function AiDashboard() {
   const [brief, setBrief] = useState<Brief>({
@@ -53,8 +27,7 @@ export default function AiDashboard() {
   const [leads, setLeads] = useState<
     Array<{ id: string; brief: Brief; summary: string }>
   >([]);
-  const mountedRef = useRef(false);
-
+ 
   const change = (k: keyof Brief, v: string) =>
     setBrief((s) => ({ ...s, [k]: v }));
 
