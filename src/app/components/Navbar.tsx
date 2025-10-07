@@ -49,14 +49,14 @@ export default function Navbar() {
           </div>
         </nav>
 
-        {/* Right-side button (desktop only) */}
-        <div className="hidden md:block">
-          <Link href="Dashboard">
-          <Button className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90">
-            AI Assistant
-          </Button>
-          </Link>
-        </div>
+        {/* Right-side button (visible on all devices) */}
+<div>
+  <Link href="/Dashboard">
+    <Button className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90">
+      AI Assistant
+    </Button>
+  </Link>
+</div>
 
         {/* Mobile hamburger */}
         <button
@@ -92,9 +92,7 @@ export default function Navbar() {
                   {link.name}
                 </Link>
               ))}
-              <Button className="w-full rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90">
-                Dashboard
-              </Button>
+ 
             </div>
           </motion.div>
         )}
