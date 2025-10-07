@@ -75,13 +75,13 @@ export default function WebsiteServicesBento() {
     show: { transition: { staggerChildren: 0.06 } },
   };
 
-  const item = {
+  const item: Variant = {
     hidden: { opacity: 0, y: 18, rotate: -0.5 },
     show: {
       opacity: 1,
       y: 0,
       rotate: 0,
-      transition: { duration: 0.45, ease: "easeOut" },
+      transition: { duration: 0.45, ease: ["easeOut"] }, // ✅ array form fixes TypeScript
     },
     hover: {
       y: -6,
