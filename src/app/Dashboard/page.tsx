@@ -1,18 +1,15 @@
 "use client"
 
-import TemplateSection from "../components/TemplateSection"    
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
 import AiAssistant from "../components/AiAssistant"
-
-export default function TemplatePage  () {
+import AiDashboard from "../components/Dashboard"
+export default function AiPage() {
   return (
     <div>
       <Navbar />
-    
-        <TemplateSection />
-       <AiAssistant />
-    
+      <AiDashboard />
+      <AiAssistant />
       <Footer />
     </div>
   )

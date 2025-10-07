@@ -12,7 +12,7 @@ import { Menu, X } from "lucide-react"
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "Templates", href: "/gallery" },
-  { name: "Pricing", href: "/pricing" },
+  { name: "Packages", href: "/Packages" },
   { name: "Contact", href: "/contact" },
 ]
 
@@ -51,9 +51,11 @@ export default function Navbar() {
 
         {/* Right-side button (desktop only) */}
         <div className="hidden md:block">
+          <Link href="Dashboard">
           <Button className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90">
-            Dashboard
+            AI Assistant
           </Button>
+          </Link>
         </div>
 
         {/* Mobile hamburger */}

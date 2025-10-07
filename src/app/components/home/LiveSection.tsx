@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { motion } from "framer-motion"
+import Image from "next/image";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function LiveSection() {
   return (
@@ -9,7 +10,6 @@ export default function LiveSection() {
       <div className="max-w-8xl mx-auto px-6">
         {/* Card container */}
         <div className="bg-black rounded-3xl px-10 py-16 grid md:grid-cols-2 gap-12 items-center">
-          
           {/* Left Column - Text */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -22,13 +22,14 @@ export default function LiveSection() {
               Easify your <br /> live launch.
             </h2>
             <p className="text-lg text-gray-400 max-w-md">
-              Take your project live instantly. Fast, secure, and effortless — 
+              Take your project live instantly. Fast, secure, and effortless —
               built for creators who want to move now, not later.
             </p>
 
+            <Link href="/go-live">
             <button className="mt-6 px-6 py-3 bg-white text-black font-semibold rounded-xl hover:scale-105 transition-transform">
-              🚀 Go Live
-            </button>
+              Go Live
+            </button></Link>
           </motion.div>
 
           {/* Right Column - Image */}
@@ -50,5 +51,5 @@ export default function LiveSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

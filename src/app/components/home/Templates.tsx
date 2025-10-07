@@ -63,7 +63,7 @@ export default function Templates() {
 
         {/* CTA */}
         <div className="mt-12">
-          <Link href="/templates">
+          <Link href="/gallery">
             <Button size="lg" className="rounded-full">
               Browse All Templates
             </Button>

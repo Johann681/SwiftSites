@@ -1,31 +1,31 @@
 import {
-    SiReact,
-    SiNextdotjs,
-    SiTailwindcss,
-    SiNodedotjs,
-    SiMongodb,
-    SiTypescript,
-    SiRedux,
-    SiExpress,
-    SiPrisma,
-    SiGraphql,
-    SiFramer,
-  } from "react-icons/si";
-  
-  export const frameworks = [
-    { name: "React", Icon: SiReact },
-    { name: "Next.js", Icon: SiNextdotjs },
-    { name: "Tailwind CSS", Icon: SiTailwindcss },
-    { name: "Node.js", Icon: SiNodedotjs },
-    { name: "MongoDB", Icon: SiMongodb },
-    { name: "TypeScript", Icon: SiTypescript },
-    { name: "Redux", Icon: SiRedux },
-    { name: "Express", Icon: SiExpress },
-    { name: "Prisma", Icon: SiPrisma },
-    { name: "GraphQL", Icon: SiGraphql },
-    { name: "Framer Motion", Icon: SiFramer },
-  ];
-  import { Shield, Rocket, Palette, Cloud } from "lucide-react"
+  SiReact,
+  SiNextdotjs,
+  SiTailwindcss,
+  SiNodedotjs,
+  SiMongodb,
+  SiTypescript,
+  SiRedux,
+  SiExpress,
+  SiPrisma,
+  SiGraphql,
+  SiFramer,
+} from "react-icons/si";
+
+export const frameworks = [
+  { name: "React", Icon: SiReact },
+  { name: "Next.js", Icon: SiNextdotjs },
+  { name: "Tailwind CSS", Icon: SiTailwindcss },
+  { name: "Node.js", Icon: SiNodedotjs },
+  { name: "MongoDB", Icon: SiMongodb },
+  { name: "TypeScript", Icon: SiTypescript },
+  { name: "Redux", Icon: SiRedux },
+  { name: "Express", Icon: SiExpress },
+  { name: "Prisma", Icon: SiPrisma },
+  { name: "GraphQL", Icon: SiGraphql },
+  { name: "Framer Motion", Icon: SiFramer },
+];
+import { Shield, Rocket, Palette, Cloud } from "lucide-react";
 
 export const features = [
   {
@@ -52,8 +52,7 @@ export const features = [
     icon: Cloud,
     size: "col-span-2 row-span-1",
   },
-]
-
+];
 
 export const templates = [
   {
@@ -71,7 +70,7 @@ export const templates = [
     description: "Boost sales with a fast and user-friendly storefront.",
     image: "/screenshot3.png",
   },
-]
+];
 
 export const plans = [
   {
@@ -118,5 +117,141 @@ export const plans = [
     ],
     action: "Contact Sales",
     popular: false,
+  },
+];
+
+// -------------------------------
+// File: lib/constants.ts (left unchanged but included here for completeness in the canvas)
+// -------------------------------
+
+export type Service = {
+  id: string;
+  name: string;
+  slug?: string;
+  category?: string;
+  popular?: boolean;
+  blurb?: string;
+  features: string[];
+  tags?: string[];
+  monthly?: number | null;
+  yearly?: number | null;
+  action?: string;
+  actionHref?: string;
+  iconName?: string;
+  order?: number;
+  meta?: Record<string, any>;
+};
+
+export const services: Service[] = [
+  {
+    id: "wp-business",
+    name: "WordPress Business Site",
+    slug: "wordpress-business",
+    category: "wordpress",
+    popular: false,
+    blurb: "Conversion-focused websites for service businesses and agencies.",
+    features: [
+      "Custom responsive theme",
+      "Contact & lead capture forms",
+      "SEO-friendly structure",
+      "Speed & basic performance tuning",
+    ],
+    tags: ["wordpress", "business", "seo"],
+    monthly: null,
+    yearly: null,
+    action: "Request a Quote",
+    actionHref: "/contact?service=wordpress-business",
+    iconName: "briefcase",
+    order: 10,
+  },
+
+  {
+    id: "woo-store",
+    name: "WooCommerce Store",
+    slug: "woocommerce-store",
+    category: "ecommerce",
+    popular: true,
+    blurb: "Full e-commerce with payments, shipping and product management.",
+    features: [
+      "Product & variant setup",
+      "Payment gateway integration",
+      "Inventory & order workflows",
+      "Product SEO & analytics",
+    ],
+    tags: ["woocommerce", "ecommerce", "payments"],
+    monthly: null,
+    yearly: null,
+    action: "Start a Store",
+    actionHref: "/contact?service=woocommerce-store",
+    iconName: "shopping-cart",
+    order: 20,
+  },
+
+  {
+    id: "school-cbt",
+    name: "School Website + CBT",
+    slug: "school-website-cbt",
+    category: "education",
+    popular: false,
+    blurb:
+      "A full school portal: public site, admin dashboard, student portal, and CBT (computer-based testing).",
+    features: [
+      "Public school site & admissions pages",
+      "Student registration & payments",
+      "CBT module: timed exams, question banks, proctoring options",
+      "Result portal & downloadable reports",
+      "Teacher/admin dashboard & user roles",
+    ],
+    tags: ["school", "cbt", "lms", "admissions"],
+    monthly: null,
+    yearly: null,
+    action: "Discuss School Project",
+    actionHref: "/contact?service=school-website-cbt",
+    iconName: "school",
+    order: 30,
+    meta: {
+      supportsProctoring: true,
+      maxConcurrentTests: 1000,
+    },
+  },
+
+  {
+    id: "membership-lms",
+    name: "Membership & LMS (WordPress)",
+    slug: "membership-lms",
+    category: "education",
+    popular: false,
+    blurb:
+      "Paid memberships, gated content, or course delivery with user progress tracking.",
+    features: [
+      "Member roles & protected content",
+      "Payment & recurring billing integration",
+      "Course/Curriculum setup & progress tracking",
+      "Certificates & downloads",
+    ],
+    tags: ["lms", "memberships", "courses"],
+    action: "Discuss Memberships",
+    actionHref: "/contact?service=membership-lms",
+    order: 40,
+  },
+
+  {
+    id: "migration-speed-security",
+    name: "Migration, Speed & Security",
+    slug: "migration-speed-security",
+    category: "maintenance",
+    popular: false,
+    blurb:
+      "Migrate, speed up and secure your site with backups and monitoring.",
+    features: [
+      "Site migration & DNS setup",
+      "Performance optimization & caching",
+      "Daily backups & one-click restore",
+      "Security hardening & malware scans",
+    ],
+    tags: ["migration", "performance", "security"],
+    action: "Get Protected",
+    actionHref: "/contact?service=migration-speed-security",
+    order: 50,
   },
 ];

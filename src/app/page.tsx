@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import Templates from "./components/home/Templates"
 import LiveSection from "./components/home/LiveSection"
 import Footer from "./components/Footer"
+import AiAssistant from "./components/AiAssistant"
 
 
 const Hero = dynamic(() => import("./components/home/Hero"), { ssr: false })
@@ -22,6 +23,7 @@ const Page = () => {
         <FrameWorks />
         <Templates />
         <LiveSection />
+        <AiAssistant/>
         <Footer />
       </Suspense>
       
