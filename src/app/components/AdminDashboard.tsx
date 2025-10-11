@@ -424,8 +424,10 @@ export default function AiDashboard() {
 
                       alert("✅ Preference successfully sent to admin!");
                       setShowModal(false);
-                    } catch (err: any) {
-                      alert("❌ Error sending preference: " + err.message);
+                    } catch (err: unknown) {
+                      const message =
+                        err instanceof Error ? err.message : String(err);
+                      alert("❌ Error sending preference: " + message);
                     } finally {
                       setSending(false);
                     }
