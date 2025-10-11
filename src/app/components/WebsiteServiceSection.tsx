@@ -1,8 +1,6 @@
 "use client";
 
-
-
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -12,7 +10,6 @@ export default function WebsiteServicesBento() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const catScroller = useRef<HTMLDivElement | null>(null);
-
   const [slider, setSlider] = useState({ left: 0, width: 0, visible: false });
 
   // get categories from services
@@ -25,69 +22,59 @@ export default function WebsiteServicesBento() {
   // filter services
   const services = useMemo(() => {
     return ALL_SERVICES.filter(
-      (s) =>
-        selectedCategory === "all" || (s.category ?? "") === selectedCategory
+      (s) => selectedCategory === "all" || (s.category ?? "") === selectedCategory
     );
   }, [selectedCategory]);
 
-  const bigService: Service | null =
-    services.find((s) => s.popular) ?? services[0] ?? null;
+  const bigService: Service | null = services.find((s) => s.popular) ?? services[0] ?? null;
   const otherServices = services.filter((s) => s.id !== bigService?.id);
 
-  const updateSlider = (cat = selectedCategory) => {
-    const scroller = catScroller.current;
-    if (!scroller) return setSlider((s) => ({ ...s, visible: false }));
+  const updateSlider = useCallback(
+    (cat = selectedCategory) => {
+      const scroller = catScroller.current;
+      if (!scroller) return setSlider((s) => ({ ...s, visible: false }));
 
-    const btn = scroller.querySelector<HTMLButtonElement>(
-      `[data-cat="${cat}"]`
-    );
-    if (!btn) return setSlider((s) => ({ ...s, visible: false }));
+      const btn = scroller.querySelector<HTMLButtonElement>(`[data-cat="${cat}"]`);
+      if (!btn) return setSlider((s) => ({ ...s, visible: false }));
 
-    const rect = scroller.getBoundingClientRect();
-    const btnRect = btn.getBoundingClientRect();
+      const rect = scroller.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
 
-    setSlider({
-      left: btnRect.left - rect.left + scroller.scrollLeft,
-      width: btnRect.width,
-      visible: true,
-    });
-  };
+      setSlider({
+        left: btnRect.left - rect.left + scroller.scrollLeft,
+        width: btnRect.width,
+        visible: true,
+      });
+    },
+    [selectedCategory]
+  );
 
   const handleSelectCategory = (cat: string) => {
     setSelectedCategory(cat);
-    const btn = catScroller.current?.querySelector<HTMLButtonElement>(
-      `[data-cat="${cat}"]`
-    );
+    const btn = catScroller.current?.querySelector<HTMLButtonElement>(`[data-cat="${cat}"]`);
     if (btn) {
       btn.scrollIntoView({ behavior: "smooth", inline: "center" });
       btn.focus({ preventScroll: true });
     }
     requestAnimationFrame(() => updateSlider(cat));
-  };useEffect(() => {
+  };
+
+  useEffect(() => {
     updateSlider();
     const onResize = () => updateSlider();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [selectedCategory, updateSlider]); // ✅ include updateSlider
-  
-  const container = {
+  }, [selectedCategory, updateSlider]);
+
+  const container: Variants = {
     hidden: {},
     show: { transition: { staggerChildren: 0.06 } },
   };
 
   const item: Variants = {
     hidden: { opacity: 0, y: 18, rotate: -0.5 },
-    show: {
-      opacity: 1,
-      y: 0,
-      rotate: 0,
-      transition: { duration: 0.45, ease: ["easeOut"] }, // ✅ array form fixes TypeScript
-    },
-    hover: {
-      y: -6,
-      scale: 1.01,
-      boxShadow: "0 12px 28px rgba(15,23,42,0.1)",
-    },
+    show: { opacity: 1, y: 0, rotate: 0, transition: { duration: 0.45, ease: ["easeOut"] } },
+    hover: { y: -6, scale: 1.01, boxShadow: "0 12px 28px rgba(15,23,42,0.1)" },
   };
 
   return (
@@ -121,8 +108,7 @@ export default function WebsiteServicesBento() {
             Sites I Build — WordPress & WooCommerce
           </h2>
           <p className="mt-3 text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
-            Explore curated services with conversion-first design and eCommerce
-            reliability. Pick a category to filter.
+            Explore curated services with conversion-first design and eCommerce reliability. Pick a category to filter.
           </p>
         </motion.div>
 
@@ -132,11 +118,7 @@ export default function WebsiteServicesBento() {
             <motion.div
               layout
               initial={{ opacity: 0 }}
-              animate={{
-                opacity: slider.visible ? 1 : 0,
-                left: slider.left,
-                width: slider.width,
-              }}
+              animate={{ opacity: slider.visible ? 1 : 0, left: slider.left, width: slider.width }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="absolute top-[6px] h-[40px] bg-indigo-600 rounded-full z-0"
             >
@@ -159,9 +141,7 @@ export default function WebsiteServicesBento() {
                   data-cat={cat}
                   onClick={() => handleSelectCategory(cat)}
                   className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap ${
-                    selectedCategory === cat
-                      ? "text-white"
-                      : "text-gray-700 hover:text-indigo-600"
+                    selectedCategory === cat ? "text-white" : "text-gray-700 hover:text-indigo-600"
                   }`}
                   role="tab"
                   aria-selected={selectedCategory === cat}
@@ -202,18 +182,14 @@ export default function WebsiteServicesBento() {
                 />
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-xl md:text-2xl font-semibold text-gray-900">
-                      {bigService.name}
-                    </h3>
+                    <h3 className="text-xl md:text-2xl font-semibold text-gray-900">{bigService.name}</h3>
                     {bigService.popular && (
                       <span className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-full font-semibold">
                         Most Popular
                       </span>
                     )}
                   </div>
-                  <p className="text-sm md:text-base text-gray-700 mb-4">
-                    {bigService.blurb}
-                  </p>
+                  <p className="text-sm md:text-base text-gray-700 mb-4">{bigService.blurb}</p>
                   <ul className="space-y-1 text-sm text-gray-600">
                     {bigService.features.map((f) => (
                       <li key={f} className="flex items-center gap-2">
@@ -223,9 +199,7 @@ export default function WebsiteServicesBento() {
                   </ul>
                 </div>
                 <Button
-                  onClick={() =>
-                    router.push(bigService.actionHref || "/contact")
-                  }
+                  onClick={() => router.push(bigService.actionHref || "/contact")}
                   className="mt-6 rounded-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-medium shadow-md hover:from-indigo-700"
                 >
                   {bigService.action ?? "Learn more"}
@@ -233,9 +207,7 @@ export default function WebsiteServicesBento() {
               </motion.article>
             ) : (
               <div className="col-span-1 sm:col-span-2 md:row-span-2 flex items-center justify-center rounded-3xl border p-8 bg-white/60 backdrop-blur-xl">
-                <p className="text-gray-500 text-center">
-                  No services in this category yet.
-                </p>
+                <p className="text-gray-500 text-center">No services in this category yet.</p>
               </div>
             )}
           </AnimatePresence>
@@ -257,18 +229,10 @@ export default function WebsiteServicesBento() {
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <h4 className="text-md font-semibold text-gray-900">
-                    {s.name}
-                  </h4>
-                  {s.popular && (
-                    <span className="px-2 py-0.5 bg-indigo-600 text-white text-xs rounded-full">
-                      Popular
-                    </span>
-                  )}
+                  <h4 className="text-md font-semibold text-gray-900">{s.name}</h4>
+                  {s.popular && <span className="px-2 py-0.5 bg-indigo-600 text-white text-xs rounded-full">Popular</span>}
                 </div>
-                {s.blurb && (
-                  <p className="mt-2 text-sm text-gray-700">{s.blurb}</p>
-                )}
+                {s.blurb && <p className="mt-2 text-sm text-gray-700">{s.blurb}</p>}
                 <ul className="mt-3 space-y-1 text-sm text-gray-600">
                   {s.features.map((f) => (
                     <li key={f} className="flex items-center gap-2">
@@ -280,9 +244,7 @@ export default function WebsiteServicesBento() {
               <Button
                 onClick={() => router.push(s.actionHref || "/contact")}
                 className={`mt-4 rounded-full py-2 font-medium ${
-                  s.popular
-                    ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white"
-                    : "bg-gray-900 hover:bg-gray-800 text-white"
+                  s.popular ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white" : "bg-gray-900 hover:bg-gray-800 text-white"
                 }`}
               >
                 {s.action ?? "Learn more"}
@@ -298,12 +260,9 @@ export default function WebsiteServicesBento() {
             className="rounded-3xl border border-white/30 bg-white/60 backdrop-blur-xl shadow-md p-5 flex flex-col justify-between"
           >
             <div>
-              <h4 className="text-md font-semibold text-gray-900">
-                Need something custom?
-              </h4>
+              <h4 className="text-md font-semibold text-gray-900">Need something custom?</h4>
               <p className="mt-2 text-sm text-gray-600">
-                Got a unique idea or integration in mind? Let’s create something
-                special together.
+                Got a unique idea or integration in mind? Let’s create something special together.
               </p>
             </div>
             <Button
