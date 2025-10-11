@@ -1,310 +1,510 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { Send, Sparkles } from "lucide-react";
+import { QUICK_SUGGESTIONS } from "@/lib/constants";
 
-// Interfaces for typing
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  createdAt: string;
-  hasSubmittedPreference: boolean;
-  preferenceId?: string;
-}
+type Brief = {
+  companyName: string;
+  industry: string;
+  budget: string;
+  style: string;
+  description: string;
+};
 
-interface Preference {
-  user?: User;
-  title?: string;
-  description?: string;
-  image?: string;
-  error?: string;
-}
+export default function AiDashboard() {
+  const [brief, setBrief] = useState<Brief>({
+    companyName: "",
+    industry: "",
+    budget: "",
+    style: "Modern",
+    description: "",
+  });
 
-export default function AdminDashboardProfessional() {
-  const API_URL = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-  ).replace(/\/$/, "");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [leads, setLeads] = useState<
+    Array<{ id: string; brief: Brief; summary: string }>
+  >([]);
+  const [sending, setSending] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [selectedPref, setSelectedPref] = useState<Preference | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // ✅ Load user ID from localStorage
+  useEffect(() => {
+    const storedUserInfo = localStorage.getItem("userInfo");
+    const storedToken = localStorage.getItem("token");
 
-  // auth & redirect helper
-  const goToLogin = () => {
-    localStorage.removeItem("adminToken");
-    window.location.href = "/admin";
-  };
-
-  // fetch users with preference status
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError("");
     try {
-      const token = localStorage.getItem("adminToken");
-      if (!token) return goToLogin();
+      if (storedUserInfo) {
+        const parsed = JSON.parse(storedUserInfo);
+        if (parsed?._id) {
+          setUserId(parsed._id);
+          localStorage.setItem("userId", parsed._id);
+          return;
+        }
+      }
 
-      const res = await fetch(`${API_URL}/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.status === 401) return goToLogin();
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data?.message || "Failed to load users");
-        setUsers([]);
-      } else {
-        setUsers(Array.isArray(data) ? data : []);
+      // fallback: extract from token
+      if (storedToken) {
+        const payload = JSON.parse(atob(storedToken.split(".")[1]));
+        if (payload.id) {
+          setUserId(payload.id);
+          localStorage.setItem("userId", payload.id);
+        }
       }
     } catch (err) {
-      console.error("fetchUsers error:", err);
-      setError("Server error while loading users");
+      console.warn("⚠️ Failed to load user info:", err);
+    }
+  }, []);
+
+  const change = (key: keyof Brief, value: string) =>
+    setBrief((s) => ({ ...s, [key]: value }));
+
+  const generatePlan = async (payload?: Brief) => {
+    const data = payload ?? brief;
+    setLoading(true);
+    setResult(null);
+
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+
+      const text = [
+        `✨ Proposal for ${data.companyName || "Your Business"} ✨`,
+        ``,
+        `📦 Recommended Package: ${selectPackageFromBudget(data.budget)}`,
+        ``,
+        `🧭 Concept: A ${data.style.toLowerCase()} ${
+          data.industry || "business"
+        } website focused on conversions.`,
+        `💡 Core Sections: Hero, Services/Menu, Gallery/Products, About, Contact.`,
+        `⚙️ Budget Fit: ${estimateText(data.budget)}`,
+        ``,
+        `🌟 Key Features: ${featureSuggestions(data)}`,
+        ``,
+        `Would you like to send this proposal to the dev team or refine it further?`,
+      ].join("\n");
+
+      setResult(text);
+      setShowModal(true);
+
+      const id = `${Date.now()}`;
+      setLeads((prev) => [{ id, brief: data, summary: text }, ...prev]);
+    } catch {
+      setResult("⚠️ Error generating plan. Try again later.");
+      setShowModal(true);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const handleQuick = (title: string) => {
+    const mapping: Record<string, Partial<Brief>> = {
+      "Portfolio Site": {
+        industry: "Creative / Portfolio",
+        style: "Minimal",
+        budget: "₦40k–₦100k",
+      },
+      "E-Commerce": {
+        industry: "Retail / E-commerce",
+        style: "Modern",
+        budget: "₦150k–₦400k",
+      },
+      "Restaurant / Food": {
+        industry: "Food & Beverage",
+        style: "Warm",
+        budget: "₦60k–₦150k",
+      },
+      "Business Website": {
+        industry: "Corporate",
+        style: "Professional",
+        budget: "₦50k–₦200k",
+      },
+    };
 
-  // open preference modal by id
-  const openPreference = async (id: string) => {
-    if (!id) return;
-    setSelectedPref(null);
-    setIsModalOpen(true);
+    const preset = mapping[title] ?? {};
+    const payload = { ...brief, ...preset };
+    setBrief(payload);
+    generatePlan(payload);
+  };
 
+  // --- Helpers ---
+  const selectPackageFromBudget = (b: string) => {
+    const n = parseBudgetNumber(b);
+    if (n === null) return "Starter";
+    if (n < 80000) return "Starter";
+    if (n < 200000) return "Business";
+    return "Premium";
+  };
+
+  const estimateText = (b: string) => {
+    const p = selectPackageFromBudget(b);
+    if (p === "Starter") return "Simple site — fast & affordable.";
+    if (p === "Business") return "Balanced scope — great for growth.";
+    return "Full-scale package with advanced features.";
+  };
+
+  const featureSuggestions = (d: Brief) => {
+    const f: string[] = [];
+    if (d.industry?.toLowerCase().includes("food"))
+      f.push("Menu + WhatsApp ordering");
+    if (d.industry?.toLowerCase().includes("shop"))
+      f.push("Product catalog + checkout");
+    if (d.style?.toLowerCase().includes("minimal"))
+      f.push("Large hero & clean gallery");
+    if (!f.length) f.push("Responsive layout + CTA + SEO setup");
+    return f.join(", ");
+  };
+
+  const parseBudgetNumber = (b: string): number | null => {
     try {
-      const token = localStorage.getItem("adminToken");
-      if (!token) return goToLogin();
-
-      const res = await fetch(`${API_URL}/admin/preference/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.status === 401) return goToLogin();
-
-      const data = await res.json();
-      if (!res.ok) {
-        setSelectedPref({
-          error: data?.message || "Failed to fetch preference",
-        });
-      } else {
-        setSelectedPref(data);
-      }
-    } catch (err) {
-      console.error("openPreference error:", err);
-      setSelectedPref({ error: "Server error fetching preference" });
+      const digits = b.replace(/[^\d]/g, "");
+      if (!digits) return null;
+      return Number(digits);
+    } catch {
+      return null;
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    window.location.href = "/admin";
-  };
-
-  // small animation variants
-  const fadeUp = {
-    hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.45 } },
-  };
-
+  // --- UI ---
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-6 mb-6">
-          <div>
-            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}>
-              <p className="text-indigo-600 italic text-sm">
-                “The way is in training — sharpen your path, then walk it.”
-              </p>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-2">
-                Lotus — Dashboard
-              </h1>
-              <p className="mt-2 text-slate-500 max-w-xl">
-                Clean, focused admin cockpit — manage templates, review requests, and respond quickly.
-              </p>
-            </motion.div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={fetchUsers}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
-            >
-              Refresh
-            </button>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:shadow transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-
-        {/* Bento Grid */}
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      {/* HERO SECTION */}
+      <div className="max-w-6xl mx-auto px-6 py-12">
         <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-6"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl p-8 shadow-lg grid grid-cols-1 md:grid-cols-3 gap-6 items-center"
         >
-          {/* Left column */}
-          <motion.div variants={fadeUp} className="lg:col-span-5 space-y-6">
-            {/* Hero card */}
-            <motion.div whileHover={{ scale: 1.01 }} className="bg-white rounded-2xl p-6 shadow">
-              <div className="flex items-center gap-4">
-                <Image
-                  src="/lotus.png"
-                  alt="Lotus avatar"
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
-                />
-                <div>
-                  <div className="text-lg font-bold text-slate-800">Hello, Lotus</div>
-                  <div className="text-sm text-slate-500 mt-1">
-                    Quick actions and a place to post new templates.
-                  </div>
-                  <div className="mt-4 flex items-center gap-3">
-                    <Link
-                      href="/templates"
-                      className="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700"
-                    >
-                      Post Template
-                    </Link>
-                    <a
-                      href="#templates"
-                      className="px-3 py-2 rounded-md bg-white border text-sm text-slate-700"
-                    >
-                      Templates
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+          <div className="md:col-span-2">
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+              <Sparkles className="text-indigo-600 w-6 h-6" />
+              Your AI Design Companion
+            </h1>
+            <p className="mt-3 text-gray-600 max-w-xl">
+              Describe your brand and budget — AI will propose a tailored
+              website plan you can instantly send to your dev team.
+            </p>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <motion.div variants={fadeUp} whileHover={{ scale: 1.03 }} className="bg-white p-4 rounded-xl shadow text-center">
-                <div className="text-xs text-slate-400">Users</div>
-                <div className="text-2xl font-bold text-slate-900">{users.length}</div>
-                <div className="text-xs text-indigo-600 mt-1">Manage users</div>
-              </motion.div>
-              <motion.div variants={fadeUp} whileHover={{ scale: 1.03 }} className="bg-white p-4 rounded-xl shadow text-center">
-                <div className="text-xs text-slate-400">Preferences</div>
-                <div className="text-2xl font-bold text-slate-900">
-                  {users.filter((u) => u.hasSubmittedPreference).length}
-                </div>
-                <div className="text-xs text-indigo-600 mt-1">Recent requests</div>
-              </motion.div>
-              <motion.div variants={fadeUp} whileHover={{ scale: 1.03 }} className="bg-white p-4 rounded-xl shadow text-center">
-                <div className="text-xs text-slate-400">New</div>
-                <div className="text-2xl font-bold text-slate-900">—</div>
-                <div className="text-xs text-indigo-600 mt-1">Unread</div>
-              </motion.div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("brief-form")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="px-5 py-2.5 rounded-full bg-indigo-600 text-white font-medium shadow hover:bg-indigo-700 transition"
+              >
+                Start a Project
+              </button>
+              <button
+                onClick={() =>
+                  window.dispatchEvent(new CustomEvent("open-ai-assistant"))
+                }
+                className="px-5 py-2.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              >
+                Chat with AI
+              </button>
             </div>
+          </div>
 
-            {/* Quick actions */}
-            <motion.div variants={fadeUp} className="bg-white p-4 rounded-xl shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-slate-800">Quick actions</div>
-                  <div className="text-xs text-slate-500">Common admin tasks</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={fetchUsers} className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded">Refresh</button>
-                  <a href="#templates" className="px-3 py-2 bg-white border rounded text-sm">Templates</a>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Right column: Users grid */}
-          <motion.div variants={fadeUp} className="lg:col-span-7">
-            <div className="bg-white rounded-2xl p-6 shadow">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-slate-800">Registered Users</h3>
-                <div className="text-sm text-slate-500">Sorted by newest</div>
-              </div>
-
-              {loading ? (
-                <div className="py-12 text-center text-slate-500">Loading users…</div>
-              ) : error ? (
-                <div className="py-6 text-center text-red-600">{error}</div>
-              ) : users.length === 0 ? (
-                <div className="py-8 text-center text-slate-500">No registered users yet.</div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <AnimatePresence>
-                    {users.map((u) => (
-                      <motion.article
-                        key={u._id}
-                        layout
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 6 }}
-                        whileHover={{ scale: 1.01 }}
-                        className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex flex-col justify-between"
+          {/* Quick suggestions */}
+          <div className="bg-indigo-50 rounded-2xl p-4">
+            <h3 className="text-sm font-semibold text-indigo-700 mb-2">
+              Quick Suggestions
+            </h3>
+            <div className="flex flex-col gap-2">
+              {QUICK_SUGGESTIONS.map((q) => (
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  key={q.title}
+                  onClick={() => handleQuick(q.title)}
+                  className="text-left p-3 rounded-xl bg-white shadow-sm hover:shadow-md border border-transparent hover:border-indigo-100 transition"
+                >
+                  <div className="flex justify-between text-sm font-medium text-gray-900">
+                    <span>{q.title}</span>
+                    <span className="text-xs text-gray-500">{q.estimated}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-600">{q.short}</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {q.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-semibold">
-                            {u.name ? u.name.charAt(0).toUpperCase() : "U"}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between gap-3">
-                              <div>
-                                <div className="text-sm font-medium text-slate-900">{u.name || "—"}</div>
-                                <div className="text-xs text-slate-500">{u.email}</div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-xs text-slate-400">Joined</div>
-                                <div className="text-sm text-slate-600">{new Date(u.createdAt).toLocaleDateString()}</div>
-                              </div>
-                            </div>
-
-                            <div className="mt-3 flex items-center justify-between gap-3">
-                              <div className="text-xs text-slate-500">
-                                {u.phone ? <span className="text-slate-700">{u.phone}</span> : <span className="text-slate-400">No phone</span>}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {u.hasSubmittedPreference ? (
-                                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-indigo-50 text-indigo-700">Submitted</span>
-                                ) : (
-                                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-slate-100 text-slate-500">—</span>
-                                )}
-
-                                <button
-                                  onClick={() => u.preferenceId ? openPreference(u.preferenceId) : null}
-                                  disabled={!u.preferenceId}
-                                  className={`ml-2 px-3 py-1 rounded-md text-sm font-medium transition ${u.preferenceId ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
-                                >
-                                  View
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.article>
+                        {t}
+                      </span>
                     ))}
-                  </AnimatePresence>
-                </div>
-              )}
+                  </div>
+                </motion.button>
+              ))}
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 
-      {/* Modal */}
+      {/* MAIN GRID */}
+      <div className="max-w-6xl mx-auto px-6 pb-24 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* LEFT FORM */}
+        <div className="lg:col-span-2 space-y-6">
+          <form
+            id="brief-form"
+            className="bg-white rounded-2xl shadow-lg p-6 space-y-4"
+          >
+            <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
+              Project Brief
+            </h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Input
+                label="Company / Brand"
+                placeholder="Bubey’s Bite"
+                value={brief.companyName}
+                onChange={(v) => change("companyName", v)}
+              />
+              <Input
+                label="Industry"
+                placeholder="Food & Beverage"
+                value={brief.industry}
+                onChange={(v) => change("industry", v)}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <Input
+                label="Budget (approx.)"
+                placeholder="₦60k–₦150k"
+                value={brief.budget}
+                onChange={(v) => change("budget", v)}
+              />
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block">
+                  Preferred Style
+                </label>
+                <select
+                  value={brief.style}
+                  onChange={(e) => change("style", e.target.value)}
+                  className="p-3 w-full border rounded-lg focus:ring-2 focus:ring-indigo-400"
+                >
+                  <option>Modern</option>
+                  <option>Minimal</option>
+                  <option>Elegant</option>
+                  <option>Warm</option>
+                  <option>Bold</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => generatePlan()}
+                  disabled={loading}
+                  className="w-full px-4 py-3 rounded-lg bg-indigo-600 text-white shadow hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    "Generating..."
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" /> Generate
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <TextArea
+              label="Describe project goals"
+              placeholder="What do you want the website to achieve?"
+              value={brief.description}
+              onChange={(v) => change("description", v)}
+            />
+          </form>
+        </div>
+
+        {/* RIGHT: SUGGESTIONS */}
+        <aside className="space-y-4">
+          <InfoCard
+            title="AI Suggestions"
+            desc={
+              result ? (
+                <pre className="text-sm whitespace-pre-wrap">{result}</pre>
+              ) : (
+                "Generate a plan to see AI suggestions here."
+              )
+            }
+          />
+
+          <div className="bg-white rounded-2xl p-4 shadow">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">
+              Saved Leads
+            </h3>
+            {leads.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                Leads you generate will appear here.
+              </p>
+            ) : (
+              <ul className="space-y-3">
+                {leads.map((l) => (
+                  <li key={l.id} className="p-3 bg-gray-50 rounded-md border">
+                    <div className="flex justify-between text-sm font-medium">
+                      <span>{l.brief.companyName || "Untitled"}</span>
+                      <span className="text-xs text-gray-500">
+                        {l.brief.budget}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1 line-clamp-3">
+                      {l.summary}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      {/* MODAL */}
       <AnimatePresence>
-        {isModalOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <motion.div initial={{ scale: 0.98, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.98, opacity: 0 }} className="w-full max-w-2xl bg-white rounded-2xl
+        {showModal && result && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="max-w-2xl w-full bg-white rounded-2xl p-6 shadow-2xl"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <h3 className="text-lg font-semibold">AI Plan Preview</h3>
+                <button
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+                {result}
+              </pre>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={async () => {
+                    if (!userId) {
+                      alert("❌ You must be logged in first.");
+                      return;
+                    }
+
+                    try {
+                      setSending(true);
+
+                      const res = await fetch(
+                        "http://localhost:4000/api/preferences",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            userId,
+                            title: `Project: ${brief.companyName || "New Lead"}`,
+                            description: result,
+                            phone: "08012345678",
+                          }),
+                        }
+                      );
+
+                      const data = await res.json();
+                      if (!res.ok)
+                        throw new Error(data.message || "Failed to send.");
+
+                      alert("✅ Preference successfully sent to admin!");
+                      setShowModal(false);
+                    } catch (err: any) {
+                      alert("❌ Error sending preference: " + err.message);
+                    } finally {
+                      setSending(false);
+                    }
+                  }}
+                  disabled={sending}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center justify-center"
+                >
+                  {sending ? "Sending..." : "Send to Admin"}
+                </button>
+
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 border rounded-lg"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// --- Reusable Components ---
+type InputProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+};
+
+function Input({ label, value, onChange, placeholder }: InputProps) {
+  return (
+    <label className="flex flex-col">
+      <span className="text-xs text-gray-600 mb-1">{label}</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      />
+    </label>
+  );
+}
+
+type TextAreaProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+};
+
+function TextArea({ label, value, onChange, placeholder }: TextAreaProps) {
+  return (
+    <label className="flex flex-col">
+      <span className="text-xs text-gray-600 mb-1">{label}</span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={5}
+        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      />
+    </label>
+  );
+}
+
+type InfoCardProps = {
+  title: string;
+  desc: React.ReactNode;
+};
+
+function InfoCard({ title, desc }: InfoCardProps) {
+  return (
+    <div className="bg-white rounded-2xl p-5 shadow">
+      <h4 className="font-semibold text-gray-900">{title}</h4>
+      <div className="mt-2 text-sm text-gray-600">{desc}</div>
+    </div>
+  );
+}
