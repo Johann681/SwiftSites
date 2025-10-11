@@ -27,9 +27,10 @@ export default function AuthForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
 
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
 
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  
   // build API base
   const RAW_API = typeof process !== "undefined" ? process.env.NEXT_PUBLIC_API_URL || "" : "";
   const API = RAW_API.replace(/\/+$/, "");
@@ -64,7 +65,7 @@ export default function AuthForm() {
     }
   }
 
-  const handleSubmit = async (ev) => {
+  const handleSubmit = async (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
     resetMessages();
 
