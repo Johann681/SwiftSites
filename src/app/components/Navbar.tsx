@@ -9,6 +9,14 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
+type User = {
+  name?: string;
+  fullName?: string;
+  username?: string;
+  email?: string;
+  // add more fields you expect from backend if needed (id?: string, token?: string, etc.)
+};
+
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "Templates", href: "/gallery" },
@@ -16,21 +24,58 @@ const navLinks = [
   { name: "Contact", href: "/contact" },
 ];
 
+function isObject(x: unknown): x is Record<string, unknown> {
+  return typeof x === "object" && x !== null;
+}
+
+function normalizeParsed(parsed: unknown): User | null {
+  // handle various shapes:
+  // - string (fallback)
+  // - { name, email, ... }
+  // - { user: { name, ... }, token }
+  // - { data: { name, ... }, token }
+  if (!parsed) return null;
+
+  if (typeof parsed === "string") {
+    return { name: parsed };
+  }
+
+  if (!isObject(parsed)) return null;
+
+  // If parsed has "user" or "data" nested object, use that
+  if (isObject(parsed.user)) return normalizeParsed(parsed.user);
+  if (isObject(parsed.data)) return normalizeParsed(parsed.data);
+
+  // At this point parsed should be an object with possible name/email fields
+  const out: User = {};
+
+  if (typeof parsed.name === "string") out.name = parsed.name;
+  if (typeof parsed.fullName === "string") out.fullName = parsed.fullName;
+  if (typeof parsed.username === "string") out.username = parsed.username;
+  if (typeof parsed.email === "string") out.email = parsed.email;
+
+  // If we found no usable fields but the object has keys, stringify a fallback
+  if (!out.name && !out.email && Object.keys(parsed).length > 0) {
+    // try to find any string-valued prop to use as a fallback name/email
+    for (const k of Object.keys(parsed)) {
+      const v = (parsed as Record<string, unknown>)[k];
+      if (typeof v === "string") {
+        out.name = out.name || v;
+        break;
+      }
+    }
+  }
+
+  return out.name || out.email ? out : null;
+}
+
 export default function Navbar(): JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // auth state from localStorage.userInfo (AuthForm saves this)
-  type User = {
-    name?: string;
-    fullName?: string;
-    username?: string;
-    email?: string;
-    [key: string]: any;
-  } | null;
-
-  const [user, setUser] = useState<User>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,22 +88,8 @@ export default function Navbar(): JSX.Element {
       return;
     }
     try {
-      const parsed = JSON.parse(raw);
-
-      // possible shapes:
-      // { name, email, ... }
-      // { user: { name, email, ... }, token }
-      // { data: { name, email, ... }, token }
-      // adapt accordingly
-      const guess =
-        parsed?.name
-          ? parsed
-          : parsed?.user
-          ? parsed.user
-          : parsed?.data
-          ? parsed.data
-          : parsed;
-
+      const parsed: unknown = JSON.parse(raw);
+      const guess = normalizeParsed(parsed);
       setUser(guess);
     } catch {
       // not JSON? treat as null
@@ -90,9 +121,8 @@ export default function Navbar(): JSX.Element {
     function onStorage(e: StorageEvent) {
       if (e.key === "userInfo") {
         try {
-          const parsed = e.newValue ? JSON.parse(e.newValue) : null;
-          const guess =
-            parsed?.name ? parsed : parsed?.user ? parsed.user : parsed?.data ? parsed.data : parsed;
+          const parsed: unknown = e.newValue ? JSON.parse(e.newValue) : null;
+          const guess = normalizeParsed(parsed);
           setUser(guess);
         } catch {
           setUser(null);
@@ -112,22 +142,13 @@ export default function Navbar(): JSX.Element {
   };
 
   // robust first-letter extraction
-  type UserLike = {
-    name?: string;
-    fullName?: string;
-    username?: string;
-    email?: string;
-  } | string | null;
-
-  const firstLetter = (u: UserLike): string => {
+  const firstLetter = (u: User | string | null): string => {
     if (!u) return "";
-    const n =
-      typeof u === "string"
-        ? u
-        : u?.name || u?.fullName || u?.username;
-    const e = typeof u === "string" ? undefined : u?.email;
-    const fallback = n || e || "";
-    return (String(fallback).trim().charAt(0) || "").toUpperCase();
+    if (typeof u === "string") {
+      return (u.trim().charAt(0) || "").toUpperCase();
+    }
+    const n = u.name || u.fullName || u.username || (u.email ?? "");
+    return (String(n).trim().charAt(0) || "").toUpperCase();
   };
 
   return (
