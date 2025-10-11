@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 type Toast = {
   id?: number;
@@ -28,9 +28,7 @@ export default function AuthForm() {
   const passwordRef = useRef<HTMLInputElement>(null);
 
   const RAW_API =
-    typeof process !== "undefined"
-      ? process.env.NEXT_PUBLIC_API_URL || ""
-      : "";
+    typeof process !== "undefined" ? process.env.NEXT_PUBLIC_API_URL || "" : "";
   const API = RAW_API.replace(/\/+$/, "");
 
   useEffect(() => {
@@ -107,7 +105,8 @@ export default function AuthForm() {
       const data = await safeParse(res);
 
       if (!res.ok) {
-        const msg = data?.message || data?.error || `Request failed (${res.status})`;
+        const msg =
+          data?.message || data?.error || `Request failed (${res.status})`;
         setError(msg);
         return;
       }
@@ -139,11 +138,24 @@ export default function AuthForm() {
       setLoading(false);
     }
   };
-
-  const containerVariants = {
-    initial: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0, scale: 0.99 }),
-    animate: { x: 0, opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } },
-    exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0, transition: { duration: 0.15 } }),
+  
+  const containerVariants: Variants = {
+    initial: (dir: number) => ({
+      x: dir > 0 ? 60 : -60,
+      opacity: 0,
+      scale: 0.99,
+    }),
+    animate: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      transition: { type: "spring" as const, stiffness: 300, damping: 24 },
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -60 : 60,
+      opacity: 0,
+      transition: { duration: 0.15 },
+    }),
   };
 
   const isLogin = mode === "login";
@@ -160,25 +172,48 @@ export default function AuthForm() {
         <div className="p-6">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-2xl font-semibold text-indigo-700">{isLogin ? "Welcome back" : "Create account"}</h3>
-              <p className="text-sm text-indigo-500 mt-1">Securely access SwiftSites</p>
+              <h3 className="text-2xl font-semibold text-indigo-700">
+                {isLogin ? "Welcome back" : "Create account"}
+              </h3>
+              <p className="text-sm text-indigo-500 mt-1">
+                Securely access SwiftSites
+              </p>
             </div>
             <div className="hidden sm:flex items-center">
-              <div className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium" aria-hidden>SwiftSites</div>
+              <div
+                className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium"
+                aria-hidden
+              >
+                SwiftSites
+              </div>
             </div>
           </div>
 
           {/* Tabs */}
           <div className="flex gap-2 mb-5 bg-indigo-50 p-1 rounded-full inline-flex">
             <button
-              onClick={() => { setMode("login"); resetMessages(); }}
-              className={`px-4 py-2 rounded-full text-sm font-medium ${isLogin ? "bg-indigo-600 text-white shadow" : "text-indigo-700/90"}`}
+              onClick={() => {
+                setMode("login");
+                resetMessages();
+              }}
+              className={`px-4 py-2 rounded-full text-sm font-medium ${
+                isLogin
+                  ? "bg-indigo-600 text-white shadow"
+                  : "text-indigo-700/90"
+              }`}
             >
               Login
             </button>
             <button
-              onClick={() => { setMode("register"); resetMessages(); }}
-              className={`px-4 py-2 rounded-full text-sm font-medium ${!isLogin ? "bg-indigo-600 text-white shadow" : "text-indigo-700/90"}`}
+              onClick={() => {
+                setMode("register");
+                resetMessages();
+              }}
+              className={`px-4 py-2 rounded-full text-sm font-medium ${
+                !isLogin
+                  ? "bg-indigo-600 text-white shadow"
+                  : "text-indigo-700/90"
+              }`}
             >
               Register
             </button>
@@ -198,34 +233,84 @@ export default function AuthForm() {
             >
               {!isLogin && (
                 <div>
-                  <label className="block text-sm font-medium text-indigo-700 mb-1">Full name</label>
-                  <input value={name} onChange={e => setName(e.target.value)} placeholder="Jane Doe" className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" required={!isLogin} />
+                  <label className="block text-sm font-medium text-indigo-700 mb-1">
+                    Full name
+                  </label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Jane Doe"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                    required={!isLogin}
+                  />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-indigo-700 mb-1">Email</label>
-                <input ref={emailRef} value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" type="email" className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" required />
+                <label className="block text-sm font-medium text-indigo-700 mb-1">
+                  Email
+                </label>
+                <input
+                  ref={emailRef}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  type="email"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  required
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-indigo-700 mb-1">Password</label>
+                <label className="block text-sm font-medium text-indigo-700 mb-1">
+                  Password
+                </label>
                 <div className="relative">
-                  <input ref={passwordRef} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" type={showPassword ? "text" : "password"} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 pr-14" required />
-                  <button type="button" onClick={() => setShowPassword(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-indigo-600/90">{showPassword ? "Hide" : "Show"}</button>
+                  <input
+                    ref={passwordRef}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    type={showPassword ? "text" : "password"}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 pr-14"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-indigo-600/90"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
                 </div>
               </div>
 
               {!isLogin && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-indigo-700 mb-1">Confirm password</label>
-                    <input value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Re-type password" type="password" className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" required />
+                    <label className="block text-sm font-medium text-indigo-700 mb-1">
+                      Confirm password
+                    </label>
+                    <input
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-type password"
+                      type="password"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                      required
+                    />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-indigo-700 mb-1">Phone (optional)</label>
-                    <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+234 812 345 6789" className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                    <label className="block text-sm font-medium text-indigo-700 mb-1">
+                      Phone (optional)
+                    </label>
+                    <input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+234 812 345 6789"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                    />
                   </div>
                 </>
               )}
@@ -233,16 +318,46 @@ export default function AuthForm() {
               {error && <div className="text-sm text-red-600">{error}</div>}
 
               <div>
-                <motion.button type="submit" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.99 }} disabled={loading} className="w-full py-2 rounded-lg bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-medium shadow">
-                  {loading ? (isLogin ? "Logging in..." : "Creating account...") : (isLogin ? "Login" : "Create account")}
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.99 }}
+                  disabled={loading}
+                  className="w-full py-2 rounded-lg bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-medium shadow"
+                >
+                  {loading
+                    ? isLogin
+                      ? "Logging in..."
+                      : "Creating account..."
+                    : isLogin
+                    ? "Login"
+                    : "Create account"}
                 </motion.button>
               </div>
 
               <div className="text-sm text-center text-indigo-500">
                 {isLogin ? (
-                  <span>Don&apos;t have an account? <button type="button" onClick={() => setMode("register")} className="text-indigo-700 font-medium">Register</button></span>
+                  <span>
+                    Don&apos;t have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setMode("register")}
+                      className="text-indigo-700 font-medium"
+                    >
+                      Register
+                    </button>
+                  </span>
                 ) : (
-                  <span>Already registered? <button type="button" onClick={() => setMode("login")} className="text-indigo-700 font-medium">Login</button></span>
+                  <span>
+                    Already registered?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setMode("login")}
+                      className="text-indigo-700 font-medium"
+                    >
+                      Login
+                    </button>
+                  </span>
                 )}
               </div>
             </motion.form>
@@ -252,10 +367,29 @@ export default function AuthForm() {
 
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-2">
         <AnimatePresence>
-          {toasts.map(t => (
-            <motion.div key={t.id} initial={{ x: 20, opacity: 0, scale: 0.98 }} animate={{ x: 0, opacity: 1, scale: 1 }} exit={{ x: 20, opacity: 0, scale: 0.98 }} transition={{ duration: 0.18 }} className={`min-w-[220px] max-w-sm rounded-lg px-4 py-2 shadow-lg border ${t.tone === "success" ? "bg-white/95 border-indigo-100" : "bg-white/95 border-red-100"}`}>
+          {toasts.map((t) => (
+            <motion.div
+              key={t.id}
+              initial={{ x: 20, opacity: 0, scale: 0.98 }}
+              animate={{ x: 0, opacity: 1, scale: 1 }}
+              exit={{ x: 20, opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.18 }}
+              className={`min-w-[220px] max-w-sm rounded-lg px-4 py-2 shadow-lg border ${
+                t.tone === "success"
+                  ? "bg-white/95 border-indigo-100"
+                  : "bg-white/95 border-red-100"
+              }`}
+            >
               <div className="flex items-start gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.tone === "success" ? "bg-indigo-600 text-white" : "bg-red-500 text-white"}`}>{t.tone === "success" ? "✓" : "!"}</div>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    t.tone === "success"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-red-500 text-white"
+                  }`}
+                >
+                  {t.tone === "success" ? "✓" : "!"}
+                </div>
                 <div className="text-sm text-gray-800">{t.text}</div>
               </div>
             </motion.div>
