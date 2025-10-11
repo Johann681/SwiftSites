@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-// Define the Project type
+// Project / Template type
 interface Project {
   id: number;
   title: string;
@@ -16,7 +16,8 @@ interface Project {
   demoUrl: string;
 }
 
-const projects: Project[] = [
+// Dummy projects
+const dummyProjects: Project[] = [
   {
     id: 1,
     title: "Modern Portfolio",
@@ -49,10 +50,39 @@ const projects: Project[] = [
 export default function ProjectsSection() {
   const [selected, setSelected] = useState<Project | null>(null);
   const [currentImg, setCurrentImg] = useState(0);
+  const [templates, setTemplates] = useState<Project[]>(dummyProjects);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const lastActiveRef = useRef<HTMLElement | null>(null);
 
-  // lock scroll when modal is open
+  // ⛓️ Fetch templates from backend and merge with dummy data
+  useEffect(() => {
+    async function fetchTemplates() {
+      try {
+        const res = await fetch("http://localhost:4000/api/templates");
+        if (!res.ok) throw new Error("Failed to fetch templates");
+        const data = await res.json();
+
+        const formatted = data.map((t: any, index: number) => ({
+          id: dummyProjects.length + index + 1,
+          title: t.title,
+          category: t.category || "General",
+          description: t.description,
+          coverImage: t.image,
+          screenshots: [t.image],
+          demoUrl: t.demoLink,
+        }));
+
+        // merge database templates with dummy
+        setTemplates((prev) => [...formatted, ...dummyProjects]);
+      } catch (error) {
+        console.error("Error loading templates:", error);
+      }
+    }
+
+    fetchTemplates();
+  }, []);
+
+  // Scroll lock
   useEffect(() => {
     if (selected) {
       document.body.style.overflow = "hidden";
@@ -64,7 +94,7 @@ export default function ProjectsSection() {
     }
   }, [selected]);
 
-  // keyboard nav
+  // Keyboard navigation
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (!selected) return;
@@ -85,7 +115,6 @@ export default function ProjectsSection() {
   return (
     <section className="relative bg-white py-20 px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
             My Projects
@@ -96,9 +125,8 @@ export default function ProjectsSection() {
           </p>
         </div>
 
-        {/* Project Grid */}
         <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
-          {projects.map((proj, idx) => (
+          {templates.map((proj, idx) => (
             <motion.article
               key={proj.id}
               initial={{ opacity: 0, y: 10 }}
@@ -110,7 +138,6 @@ export default function ProjectsSection() {
                 setCurrentImg(0);
               }}
             >
-              {/* Cover Image */}
               <div className="relative w-full h-[260px] bg-gray-100">
                 <Image
                   src={proj.coverImage}
@@ -119,8 +146,6 @@ export default function ProjectsSection() {
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-
-              {/* Info */}
               <div className="p-5">
                 <h3 className="text-lg font-semibold text-gray-900">
                   {proj.title}
@@ -130,8 +155,6 @@ export default function ProjectsSection() {
                   {proj.description}
                 </p>
               </div>
-
-              {/* Action */}
               <div className="px-5 pb-5">
                 <button
                   onClick={(e) => {
@@ -172,7 +195,6 @@ export default function ProjectsSection() {
               tabIndex={-1}
             >
               <div className="grid md:grid-cols-[2fr_1fr]">
-                {/* Left: Image Carousel */}
                 <div className="relative flex flex-col items-center bg-gray-50 p-6">
                   <div className="relative w-full h-[600px] max-h-[80vh] flex items-center justify-center rounded-xl border bg-white shadow">
                     <Image
@@ -182,8 +204,6 @@ export default function ProjectsSection() {
                       className="object-contain p-4"
                     />
                   </div>
-
-                  {/* Controls */}
                   <div className="mt-6 flex items-center justify-center gap-4">
                     <button
                       type="button"
@@ -223,7 +243,6 @@ export default function ProjectsSection() {
                   </div>
                 </div>
 
-                {/* Right: Details */}
                 <div className="p-8 flex flex-col justify-between bg-white">
                   <div>
                     <h3 className="text-3xl font-bold text-gray-900">
@@ -235,8 +254,6 @@ export default function ProjectsSection() {
                       modern design and responsiveness.
                     </p>
                   </div>
-
-                  {/* CTA */}
                   <div className="mt-8">
                     <Button
                       onClick={() => window.open(selected.demoUrl, "_blank")}
@@ -248,7 +265,6 @@ export default function ProjectsSection() {
                 </div>
               </div>
 
-              {/* Close Button */}
               <button
                 type="button"
                 onClick={() => setSelected(null)}
