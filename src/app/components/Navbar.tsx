@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { JSX } from "react/jsx-dev-runtime";
 
 type User = {
   name?: string;
