@@ -60,8 +60,8 @@ export default function AiDashboard() {
           localStorage.setItem("userId", payload.id);
         }
       }
-    } catch (err) {
-      console.warn("⚠️ Failed to load user info:", err);
+    } catch {
+      console.warn("⚠️ Failed to load user info");
     }
   }, []);
 
@@ -129,7 +129,7 @@ export default function AiDashboard() {
       };
 
       setMessages((m) => [...m, aiMsg]);
-    } catch (err) {
+    } catch {
       const errMsg: ChatMessage = {
         id: `err-${Date.now()}`,
         sender: "ai",
@@ -269,7 +269,7 @@ export default function AiDashboard() {
               AI Design Companion — Chat
             </h1>
             <p className="text-sm text-gray-600 mt-1">
-              Chat with the AI to refine your brief. When the AI says it's
+              Chat with the AI to refine your brief. When the AI says it&apos;s
               ready, confirm and it will send only the structured brief to your
               backend for a final proposal.
             </p>

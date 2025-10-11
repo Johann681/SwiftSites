@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 /**
  * AdminDashboardProfessional (template form removed)
@@ -160,9 +161,11 @@ export default function AdminDashboardProfessional() {
               className="bg-white rounded-2xl p-6 shadow"
             >
               <div className="flex items-center gap-4">
-                <img
+                <Image
                   src="/lotus.png"
                   alt="Lotus avatar"
+                  width={80}
+                  height={80}
                   className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
                 />
                 <div>

@@ -3,7 +3,7 @@
 
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
-import { motion, AnimatePresence, Variant, Variants } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { services as ALL_SERVICES, Service } from "@/lib/constants";

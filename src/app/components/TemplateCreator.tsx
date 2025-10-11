@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 type TemplateCreatorProps = {
-  onCreated?: (res?: any) => void;
+  onCreated?: (res?: unknown) => void;
 };
 
 export default function TemplateCreator({ onCreated }: TemplateCreatorProps = {}) {
@@ -117,17 +118,41 @@ export default function TemplateCreator({ onCreated }: TemplateCreatorProps = {}
         <h4 className="text-sm text-slate-500 font-medium">Live preview</h4>
         <div className="border rounded-lg overflow-hidden shadow-sm">
           <div className="flex flex-col md:flex-row">
-            <div className="w-full md:w-1/3 h-48 bg-slate-100 flex items-center justify-center">
-              {image ? <img src={image} alt={title || "preview"} className="object-cover w-full h-full" /> : <div className="text-slate-400 text-sm">No image</div>}
-            </div>
-            <div className="p-5 flex-1 space-y-1">
-              <div className="text-sm text-indigo-600 font-medium">{category || "General"}</div>
-              <div className="text-lg font-semibold text-slate-900">{title || "Template title"}</div>
-              <p className="text-sm text-slate-600">{description || "Short description appears here."}</p>
-              <a href={demoLink || "#"} target="_blank" rel="noreferrer" className="inline-block mt-2 text-indigo-600 hover:underline text-sm">
-                {demoLink ? "Open demo" : "Demo link not provided"}
-              </a>
-            </div>
+            {image ? (
+              <Image
+                src={image}
+                alt={title || "preview"}
+                className="object-cover w-full h-full"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            ) : (
+              <div className="text-slate-400 text-sm">No image</div>
+            )}
+       {image ? (
+  <Image
+    src={image}
+    alt={title || "preview"}
+    className="object-cover w-full h-full"
+    fill
+    sizes="(max-width: 768px) 100vw, 33vw"
+    style={{ objectFit: "cover" }}
+    priority
+  />
+) : (
+  <div className="text-slate-400 text-sm">No image</div>
+)}
+
+          </div>
+          <div className="p-5 flex-1 space-y-1">
+            <div className="text-sm text-indigo-600 font-medium">{category || "General"}</div>
+            <div className="text-lg font-semibold text-slate-900">{title || "Template title"}</div>
+            <p className="text-sm text-slate-600">{description || "Short description appears here."}</p>
+            <a href={demoLink || "#"} target="_blank" rel="noreferrer" className="inline-block mt-2 text-indigo-600 hover:underline text-sm">
+              {demoLink ? "Open demo" : "Demo link not provided"}
+            </a>
           </div>
         </div>
       </div>

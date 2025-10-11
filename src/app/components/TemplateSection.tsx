@@ -62,7 +62,15 @@ export default function ProjectsSection() {
         if (!res.ok) throw new Error("Failed to fetch templates");
         const data = await res.json();
 
-        const formatted = data.map((t: any, index: number) => ({
+        type BackendTemplate = {
+          title: string;
+          category?: string;
+          description: string;
+          image: string;
+          demoLink: string;
+        };
+
+        const formatted = (data as BackendTemplate[]).map((t, index: number) => ({
           id: dummyProjects.length + index + 1,
           title: t.title,
           category: t.category || "General",
@@ -73,7 +81,7 @@ export default function ProjectsSection() {
         }));
 
         // merge database templates with dummy
-        setTemplates((prev) => [...formatted, ...dummyProjects]);
+        setTemplates([...formatted, ...dummyProjects]);
       } catch (error) {
         console.error("Error loading templates:", error);
       }

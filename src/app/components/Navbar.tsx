@@ -51,7 +51,7 @@ export default function Navbar() {
           : parsed
 
       setUser(guess)
-    } catch (err) {
+    } catch {
       // not JSON? treat as null
       setUser(null)
     }
