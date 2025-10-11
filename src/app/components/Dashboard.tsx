@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Sparkles, User, Bot } from "lucide-react";
+import { Send, Sparkles} from "lucide-react";
 import { QUICK_SUGGESTIONS } from "@/lib/constants";
 
 type Brief = {
@@ -171,7 +171,7 @@ export default function AiDashboard() {
         createdAt: Date.now(),
       };
       setMessages((m) => [...m, aiMsg]);
-    } catch (err) {
+    } catch {
       setMessages((m) => [
         ...m,
         {
@@ -210,8 +210,10 @@ export default function AiDashboard() {
       if (!res.ok) throw new Error(data.message || "Failed to send.");
 
       alert("✅ Preference successfully sent to admin!");
-    } catch (err: any) {
-      alert("❌ Error sending preference: " + (err?.message || err));
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : String(err);
+      alert("❌ Error sending preference: " + errorMessage);
     } finally {
       setSending(false);
     }

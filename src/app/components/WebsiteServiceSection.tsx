@@ -63,15 +63,13 @@ export default function WebsiteServicesBento() {
       btn.focus({ preventScroll: true });
     }
     requestAnimationFrame(() => updateSlider(cat));
-  };
-
-  useEffect(() => {
+  };useEffect(() => {
     updateSlider();
     const onResize = () => updateSlider();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [selectedCategory]);
-
+  }, [selectedCategory, updateSlider]); // ✅ include updateSlider
+  
   const container = {
     hidden: {},
     show: { transition: { staggerChildren: 0.06 } },
