@@ -15,7 +15,11 @@ dotenv.config();
 const app = express();
 
 // 🧩 Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["https://swiftsites-dzow.onrender.com"], // your deployed frontend URL
+  credentials: true
+}));
+
 app.use(express.json());
 
 // 🛣️ Routes

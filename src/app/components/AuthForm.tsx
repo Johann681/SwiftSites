@@ -10,7 +10,8 @@ type Toast = {
   ttl?: number;
 };
 
-export default function AuthForm() {
+export default function AuthForm()
+ {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,7 +31,11 @@ export default function AuthForm() {
   const RAW_API =
     typeof process !== "undefined" ? process.env.NEXT_PUBLIC_API_URL || "" : "";
   const API = RAW_API.replace(/\/+$/, "");
-
+  
+  // ✅ Add this to debug
+  console.log("RAW_API:", RAW_API);
+  console.log("API after trimming slashes:", API);
+  
   useEffect(() => {
     if (emailRef.current) emailRef.current.focus();
   }, []);
@@ -397,5 +402,6 @@ export default function AuthForm() {
         </AnimatePresence>
       </div>
     </div>
+  
   );
 }
