@@ -22,7 +22,15 @@ export default function Navbar(): JSX.Element {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // auth state from localStorage.userInfo (AuthForm saves this)
-  const [user, setUser] = useState<any>(null);
+  type User = {
+    name?: string;
+    fullName?: string;
+    username?: string;
+    email?: string;
+    [key: string]: any;
+  } | null;
+
+  const [user, setUser] = useState<User>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -104,10 +112,20 @@ export default function Navbar(): JSX.Element {
   };
 
   // robust first-letter extraction
-  const firstLetter = (u: any): string => {
+  type UserLike = {
+    name?: string;
+    fullName?: string;
+    username?: string;
+    email?: string;
+  } | string | null;
+
+  const firstLetter = (u: UserLike): string => {
     if (!u) return "";
-    const n = u?.name || u?.fullName || u?.username || (typeof u === "string" ? u : null);
-    const e = u?.email;
+    const n =
+      typeof u === "string"
+        ? u
+        : u?.name || u?.fullName || u?.username;
+    const e = typeof u === "string" ? undefined : u?.email;
     const fallback = n || e || "";
     return (String(fallback).trim().charAt(0) || "").toUpperCase();
   };
