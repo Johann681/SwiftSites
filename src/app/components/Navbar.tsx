@@ -59,9 +59,9 @@ export default function Navbar() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function onDocClick(e) {
+    function onDocClick(e: MouseEvent | TouchEvent) {
       if (!menuRef.current) return
-      if (!menuRef.current.contains(e.target)) setMenuOpen(false)
+      if (!menuRef.current.contains((e.target as Node))) setMenuOpen(false)
     }
     if (menuOpen) {
       document.addEventListener("mousedown", onDocClick)
@@ -75,7 +75,7 @@ export default function Navbar() {
 
   // keep navbar reactive if other tabs update auth
   useEffect(() => {
-    function onStorage(e) {
+    function onStorage(e: StorageEvent) {
       if (e.key === "userInfo") {
         try {
           const parsed = e.newValue ? JSON.parse(e.newValue) : null
