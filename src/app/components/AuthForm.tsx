@@ -137,8 +137,14 @@ export default function AuthForm() {
       
       // optional cleanup of any old keys
       localStorage.removeItem("userToken");
+      type Toast = {
+        id?: number;
+        text: string;
+        tone?: "success" | "error";
+        ttl?: number;
+      };
       
-      pushToast({ text: "Welcome back!", tone: "success", ttl: 700 });
+      function pushToast({ id, text, tone = "success", ttl = 2800 }: Toast) {
       
       // short delay so toast can show
       setTimeout(() => {
