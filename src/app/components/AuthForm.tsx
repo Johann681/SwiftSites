@@ -240,7 +240,7 @@ export default function AuthForm() {
 
               <div className="text-sm text-center text-indigo-500">
                 {isLogin ? (
-                  <span>Don't have an account? <button type="button" onClick={() => setMode("register")} className="text-indigo-700 font-medium">Register</button></span>
+                  <span>Don&apos;t have an account? <button type="button" onClick={() => setMode("register")} className="text-indigo-700 font-medium">Register</button></span>
                 ) : (
                   <span>Already registered? <button type="button" onClick={() => setMode("login")} className="text-indigo-700 font-medium">Login</button></span>
                 )}
