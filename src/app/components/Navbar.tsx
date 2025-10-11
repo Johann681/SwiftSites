@@ -1,40 +1,41 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "Templates", href: "/gallery" },
   { name: "Packages", href: "/Packages" },
   { name: "Contact", href: "/contact" },
-]
+];
 
-export default function Navbar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
+export default function Navbar(): JSX.Element {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // auth state from localStorage.userInfo (AuthForm saves this)
-  const [user, setUser] = useState(null)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef(null)
+  const [user, setUser] = useState<any>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Read and normalize user from localStorage (robust to different shapes)
   useEffect(() => {
-    const raw = typeof window !== "undefined" ? localStorage.getItem("userInfo") : null
+    const raw =
+      typeof window !== "undefined" ? localStorage.getItem("userInfo") : null;
     if (!raw) {
-      setUser(null)
-      return
+      setUser(null);
+      return;
     }
     try {
-      const parsed = JSON.parse(raw)
+      const parsed = JSON.parse(raw);
 
       // possible shapes:
       // { name, email, ... }
@@ -48,65 +49,68 @@ export default function Navbar() {
           ? parsed.user
           : parsed?.data
           ? parsed.data
-          : parsed
+          : parsed;
 
-      setUser(guess)
+      setUser(guess);
     } catch {
       // not JSON? treat as null
-      setUser(null)
+      setUser(null);
     }
-  }, [])
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function onDocClick(e: MouseEvent | TouchEvent) {
-      if (!menuRef.current) return
-      if (!menuRef.current.contains((e.target as Node))) setMenuOpen(false)
+      if (!menuRef.current) return;
+      const target = (e.target as Node) || null;
+      if (!menuRef.current.contains(target)) setMenuOpen(false);
     }
+
     if (menuOpen) {
-      document.addEventListener("mousedown", onDocClick)
-      document.addEventListener("touchstart", onDocClick)
-      return () => {
-        document.removeEventListener("mousedown", onDocClick)
-        document.removeEventListener("touchstart", onDocClick)
-      }
+      document.addEventListener("mousedown", onDocClick);
+      document.addEventListener("touchstart", onDocClick);
     }
-  }, [menuOpen])
+
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("touchstart", onDocClick);
+    };
+  }, [menuOpen]);
 
   // keep navbar reactive if other tabs update auth
   useEffect(() => {
     function onStorage(e: StorageEvent) {
       if (e.key === "userInfo") {
         try {
-          const parsed = e.newValue ? JSON.parse(e.newValue) : null
+          const parsed = e.newValue ? JSON.parse(e.newValue) : null;
           const guess =
-            parsed?.name ? parsed : parsed?.user ? parsed.user : parsed?.data ? parsed.data : parsed
-          setUser(guess)
+            parsed?.name ? parsed : parsed?.user ? parsed.user : parsed?.data ? parsed.data : parsed;
+          setUser(guess);
         } catch {
-          setUser(null)
+          setUser(null);
         }
       }
     }
-    window.addEventListener("storage", onStorage)
-    return () => window.removeEventListener("storage", onStorage)
-  }, [])
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("userInfo")
-    localStorage.removeItem("userToken")
-    setUser(null)
-    setMenuOpen(false)
-    router.push("/")
-  }
+    localStorage.removeItem("userInfo");
+    localStorage.removeItem("userToken");
+    setUser(null);
+    setMenuOpen(false);
+    router.push("/");
+  };
 
   // robust first-letter extraction
-  const firstLetter = (u) => {
-    if (!u) return ""
-    const n = u?.name || u?.fullName || u?.username || (typeof u === "string" ? u : null)
-    const e = u?.email
-    const fallback = n || e || ""
-    return (String(fallback).trim().charAt(0) || "").toUpperCase()
-  }
+  const firstLetter = (u: any): string => {
+    if (!u) return "";
+    const n = u?.name || u?.fullName || u?.username || (typeof u === "string" ? u : null);
+    const e = u?.email;
+    const fallback = n || e || "";
+    return (String(fallback).trim().charAt(0) || "").toUpperCase();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/60 backdrop-blur-md border-b">
@@ -149,7 +153,7 @@ export default function Navbar() {
                 animate={{ y: 0, opacity: 1 }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                transition={{ type: "spring" as const, stiffness: 300, damping: 18 }}
                 className="text-sm font-medium text-white"
               >
                 AI Assistant
@@ -165,7 +169,7 @@ export default function Navbar() {
               animate={{ scale: 1, opacity: 1 }}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 22 }}
+              transition={{ type: "spring" as const, stiffness: 300, damping: 22 }}
               className="rounded-full px-4 py-1.5 bg-indigo-600 text-white text-sm font-medium shadow-md focus:outline-none"
               aria-label="Login"
             >
@@ -181,7 +185,7 @@ export default function Navbar() {
                 animate={{ scale: 1, opacity: 1 }}
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 320, damping: 24 }}
+                transition={{ type: "spring" as const, stiffness: 320, damping: 24 }}
                 className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium shadow-md focus:outline-none"
                 aria-expanded={menuOpen}
                 aria-haspopup="true"
@@ -195,7 +199,7 @@ export default function Navbar() {
                     initial={{ opacity: 0, y: -6, scale: 0.98 }}
                     animate={{ opacity: 1, y: 6, scale: 1 }}
                     exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                    transition={{ type: "spring" as const, stiffness: 300, damping: 24 }}
                     className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border z-50 overflow-hidden"
                   >
                     <div className="flex flex-col py-1">
@@ -242,7 +246,9 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     "px-3 py-2 text-sm rounded-md transition-colors",
-                    pathname === link.href ? "bg-indigo-50 text-indigo-700 font-medium" : "text-indigo-600 hover:text-indigo-800"
+                    pathname === link.href
+                      ? "bg-indigo-50 text-indigo-700 font-medium"
+                      : "text-indigo-600 hover:text-indigo-800"
                   )}
                 >
                   {link.name}
@@ -252,7 +258,10 @@ export default function Navbar() {
               <div className="pt-2 border-t mt-2">
                 {!user ? (
                   <motion.button
-                    onClick={() => { setMobileOpen(false); router.push("/userlogin") }}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      router.push("/userlogin");
+                    }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full rounded-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium shadow"
@@ -271,7 +280,13 @@ export default function Navbar() {
                       </div>
                     </div>
 
-                    <button onClick={() => { setMobileOpen(false); handleLogout() }} className="px-3 py-2 text-left text-sm text-red-600 hover:bg-gray-50 rounded-md">
+                    <button
+                      onClick={() => {
+                        setMobileOpen(false);
+                        handleLogout();
+                      }}
+                      className="px-3 py-2 text-left text-sm text-red-600 hover:bg-gray-50 rounded-md"
+                    >
                       Logout
                     </button>
                   </motion.div>
@@ -282,5 +297,5 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </header>
-  )
+  );
 }
